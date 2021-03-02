@@ -1,0 +1,101 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style type="text/css">
+    .LogPanel {
+        width: 100%;
+        font-family: Consolas;
+        font-size: 12pt;
+    }
+</style>
+
+<h2 class="display-4">Streaming Logs Sample</h2>
+
+
+<button id="pingButton" type="button" class="btn btn-primary mediumbutton">
+    <div class="mediumbuttonlabel">Ping</div>
+</button>
+
+<button id="broadcastButton" type="button" class="btn btn-primary mediumbutton">
+    <div class="mediumbuttonlabel">Broadcast</div>
+</button>
+
+
+<div id="status" class="LogPanel"></div>
+
+
+@section scripts {
+
+    <!--Reference the SignalR library. -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@3.1.8/dist/browser/signalr.min.js"></script>
+
+    <script type="text/javascript">
+
+        var signalr_connection = null;
+
+        function addStatus(message) {
+            $("#status")[0].innerHTML += message + "<br/>";
+        }
+
+        function onConnected(connection) {
+            console.log("SignalR is connected");
+            connection.off('broadcastMessage');
+            connection.on('broadcastMessage', onBroadcastMessage);
+            signalr_connection = connection;
+            // test that we can use the connection to send broadcastMessages from this client if we want to!
+            signalr_connection.send('broadcastMessage', "testing!");
+        }
+
+        function onConnectionError(error) {
+            if (error && error.message) {
+                console.error(error.message);
+            }
+            signalr_connection = null;
+        }
+
+        function onBroadcastMessage(message) {
+            addStatus(message);
+        }
+
+        function connectSignalr() {
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withAutomaticReconnect()
+                .withUrl('/log')
+                .build();
+
+            connection.onclose(onConnectionError);
+
+            connection.start()
+                .then(() => onConnected(connection))
+                .catch(error => onConnectionError(error.message));
+        }
+
+        var messageCount = 1;
+
+        function ping() {
+            $.getJSON("/api/ping/?message=" + encodeURI("ping " + messageCount));
+            messageCount++;
+        }
+
+        var messageCount = 1;
+
+        function broadcast() {
+            $.getJSON("/api/broadcast/10");
+            messageCount++;
+        }
+
+        $(document).ready(function () {
+            connectSignalr();
+
+            $("#pingButton").on("click", function (e) {
+                ping();
+            });
+
+            $("#broadcastButton").on("click", function (e) {
+                broadcast();
+            });
+        });
+    </script>
+}

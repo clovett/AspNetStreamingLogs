@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>4224c254-3235-4411-b815-2dc113551c6f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.7.1" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.7.0" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.7.0" />
+  </ItemGroup>
+
+</Project>
